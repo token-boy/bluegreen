@@ -28,6 +28,6 @@ deploy:
       --label="traefik.http.routers.$MIDDLE_CONTAINER_NAME-http.middlewares=redirect-https@file"
       --volume="/etc/localtime:/etc/localtime:ro"
       $CONTAINER_IMAGE
-    - docker stop $CONTAINER_NAME || true
-    - docker rm --force $CONTAINER_NAME || true
-    - docker rename $MIDDLE_CONTAINER_NAME $CONTAINER_NAME
+    # - docker stop $CONTAINER_NAME || true
+    # - docker rm --force $CONTAINER_NAME || true
+    # - docker rename $MIDDLE_CONTAINER_NAME $CONTAINER_NAME
