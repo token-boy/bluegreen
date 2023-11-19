@@ -23,9 +23,9 @@ deploy:
       --name=$CONTAINER_NAME
       --net=test
       --label="traefik.enable=true"
-      --label="traefik.http.routers.$CONTAINER_NAME.rule=Host(\`$CONTAINER_NAME.joy.ink\`)"
+      --label="traefik.http.routers.$CONTAINER_NAME.rule=Host(\`$CONTAINER_NAME.reserve.sya.org.cn\`)"
       --label="traefik.http.routers.$CONTAINER_NAME.tls.certResolver=myresolver"
-      --label="traefik.http.routers.$CONTAINER_NAME-http.rule=Host(\`$CONTAINER_NAME.joy.ink\`)"
+      --label="traefik.http.routers.$CONTAINER_NAME-http.rule=Host(\`$CONTAINER_NAME.reserve.sya.org.cn\`)"
       --label="traefik.http.routers.$CONTAINER_NAME-http.middlewares=redirect-https@file"
       --volume="/etc/localtime:/etc/localtime:ro"
       $CONTAINER_IMAGE
