@@ -1,6 +1,6 @@
 variables:
   CONTAINER_IMAGE: $REG/$CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA
-  CONTAINER_NAME: $CI_PROJECT_NAME
+  CONTAINER_NAME: $CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
 
 build:
   tags:
@@ -17,7 +17,7 @@ deploy:
     DOCKER_HOST: $JOYRESERVE_DEMO
   script:
     - docker pull $CONTAINER_IMAGE
-    - OLD_CONTAINER_NAME=$(docker ps  -a --format "{{.Names}}" | grep $CONTAINER_NAME)
+    - OLD_CONTAINER_NAME=$(docker ps --format "{{.Names}}" | grep $CI_PROJECT_NAME)
     - docker run --detach
       --name=$CONTAINER_NAME
       --net=test
