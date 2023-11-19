@@ -6,9 +6,7 @@ build:
   tags:
     - ci-test
   script:
-    - docker build 
-      --build-arg ENV_VERSION=$CI_COMMIT_REF_NAME 
-      --tag $CONTAINER_IMAGE .
+    - docker build --tag $CONTAINER_IMAGE .
     - docker push $CONTAINER_IMAGE
 
 deploy:
@@ -23,11 +21,11 @@ deploy:
     - docker rm --force $CONTAINER_NAME || true
     - docker run --detach
       --name=$CONTAINER_NAME
-      --net=$NET
+      --net=test
       --label="traefik.enable=true"
-      --label="traefik.http.routers.bluered.rule=Host(\`bluered.joy.ink\`)"
-      --label="traefik.http.routers.bluered.tls.certResolver=myresolver"
-      --label="traefik.http.routers.bluered-http.rule=Host(\`bluered.joy.ink\`)"
-      --label="traefik.http.routers.bluered-http.middlewares=redirect-https@file"
+      --label="traefik.http.routers.$CONTAINER_NAME.rule=Host(\`$CONTAINER_NAME.joy.ink\`)"
+      --label="traefik.http.routers.$CONTAINER_NAME.tls.certResolver=myresolver"
+      --label="traefik.http.routers.$CONTAINER_NAME-http.rule=Host(\`$CONTAINER_NAME.joy.ink\`)"
+      --label="traefik.http.routers.$CONTAINER_NAME-http.middlewares=redirect-https@file"
       --volume="/etc/localtime:/etc/localtime:ro"
       $CONTAINER_IMAGE
