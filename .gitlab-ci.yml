@@ -1,0 +1,33 @@
+variables:
+  CONTAINER_IMAGE: $REG/$CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA
+  CONTAINER_NAME: $CI_PROJECT_NAME
+
+build:
+  tags:
+    - ci-test
+  script:
+    - docker build 
+      --build-arg ENV_VERSION=$CI_COMMIT_REF_NAME 
+      --tag $CONTAINER_IMAGE .
+    - docker push $CONTAINER_IMAGE
+
+deploy:
+  stage: deploy
+  tags:
+    - ci-test
+  variables:
+    DOCKER_HOST: $JOYRESERVE_DEMO
+  script:
+    - docker pull $CONTAINER_IMAGE
+    - docker stop $CONTAINER_NAME || true
+    - docker rm --force $CONTAINER_NAME || true
+    - docker run --detach
+      --name=$CONTAINER_NAME
+      --net=$NET
+      --label="traefik.enable=true"
+      --label="traefik.http.routers.bluered.rule=Host(\`bluered.joy.ink\`)"
+      --label="traefik.http.routers.bluered.tls.certResolver=myresolver"
+      --label="traefik.http.routers.bluered-http.rule=Host(\`bluered.joy.ink\`)"
+      --label="traefik.http.routers.bluered-http.middlewares=redirect-https@file"
+      --volume="/etc/localtime:/etc/localtime:ro"
+      $CONTAINER_IMAGE
