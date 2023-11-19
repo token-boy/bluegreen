@@ -16,6 +16,7 @@ deploy:
   variables:
     DOCKER_HOST: $JOYRESERVE_DEMO
   script:
+    - echo $CI_COMMIT_SHORT_SHA > ~/.sha
     - docker pull $CONTAINER_IMAGE
     - docker stop $CONTAINER_NAME || true
     - docker rm --force $CONTAINER_NAME || true

@@ -1,5 +1,5 @@
 while true
 do
-  curl https://bluered.joyl.ink
+  curl https://bluered.reserve.sya.org.cn
   echo -e "\n"
 done
