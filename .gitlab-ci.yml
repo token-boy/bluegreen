@@ -1,6 +1,7 @@
 variables:
   CONTAINER_IMAGE: $REG/$CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA
-  CONTAINER_NAME: $CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
+  CONTAINER_NAME: $CI_PROJECT_NAME
+  MIDDLE_CONTAINER_NAME: $CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
 
 build:
   tags:
@@ -17,16 +18,16 @@ deploy:
     DOCKER_HOST: $JOYRESERVE_DEMO
   script:
     - docker pull $CONTAINER_IMAGE
-    - OLD_CONTAINER_NAME=$(docker ps --format "{{.Names}}" | grep $CI_PROJECT_NAME)
     - docker run --detach
-      --name=$CONTAINER_NAME
+      --name=$MIDDLE_CONTAINER_NAME
       --net=test
       --label="traefik.enable=true"
-      --label="traefik.http.routers.$CONTAINER_NAME.rule=Host(\`$CONTAINER_NAME.reserve.sya.org.cn\`)"
-      --label="traefik.http.routers.$CONTAINER_NAME.tls.certResolver=myresolver"
-      --label="traefik.http.routers.$CONTAINER_NAME-http.rule=Host(\`$CONTAINER_NAME.reserve.sya.org.cn\`)"
-      --label="traefik.http.routers.$CONTAINER_NAME-http.middlewares=redirect-https@file"
+      --label="traefik.http.routers.$MIDDLE_CONTAINER_NAME.rule=Host(\`$CONTAINER_NAME.reserve.sya.org.cn\`)"
+      --label="traefik.http.routers.$MIDDLE_CONTAINER_NAME.tls.certResolver=myresolver"
+      --label="traefik.http.routers.$MIDDLE_CONTAINER_NAME-http.rule=Host(\`$CONTAINER_NAME.reserve.sya.org.cn\`)"
+      --label="traefik.http.routers.$MIDDLE_CONTAINER_NAME-http.middlewares=redirect-https@file"
       --volume="/etc/localtime:/etc/localtime:ro"
       $CONTAINER_IMAGE
-    - docker stop $OLD_CONTAINER_NAME || true
-    - docker rm --force $OLD_CONTAINER_NAME || true
+    - docker stop $CONTAINER_NAME || true
+    - docker rm --force $CONTAINER_NAME || true
+    - docker rename $MIDDLE_CONTAINER_NAME $CONTAINER_NAME
