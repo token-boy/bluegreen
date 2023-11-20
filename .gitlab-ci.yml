@@ -25,6 +25,6 @@ deploy:
       $CONTAINER_IMAGE
     - else
     - docker service scale $SERVICE_NAME=2
-    - docker service update --image $CONTAINER_IMAGE SERVICE_NAME
+    - docker service update --image $CONTAINER_IMAGE $SERVICE_NAME
     - docker service scale $SERVICE_NAME=1
     - fi
