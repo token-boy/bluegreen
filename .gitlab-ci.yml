@@ -19,6 +19,7 @@ deploy:
       --name=$SERVICE_NAME
       --replicas=1
       --update-delay=10s
+      --publish published=80,target=80
       --label="traefik.enable=true"
       --label="traefik.http.routers.$SERVICE_NAME.rule=Host(\`$SERVICE_NAME.mxsyx.site\`)"
       --label="traefik.http.routers.$SERVICE_NAME.tls.certResolver=cloudflare"
