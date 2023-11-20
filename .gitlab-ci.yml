@@ -24,5 +24,6 @@ deploy:
       --label="traefik.http.routers.$SERVICE_NAME.tls.certResolver=cloudflare"
       --label="traefik.http.routers.$SERVICE_NAME-http.rule=Host(\`$SERVICE_NAME.mxsyx.site\`)"
       --label="traefik.http.routers.$SERVICE_NAME-http.middlewares=redirect-https@file"
+      $CONTAINER_IMAGE
     - fi
     # - docker service update --image $CONTAINER_IMAGE SERVICE_NAME
