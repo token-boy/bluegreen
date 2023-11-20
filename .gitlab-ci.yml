@@ -18,13 +18,10 @@ deploy:
       --name=$SERVICE_NAME
       --replicas=1
       --update-delay=10s
-      --publish published=8080,target=80
+      --publish published=8090,target=80
       --label="traefik.enable=true"
       --label="traefik.http.routers.$SERVICE_NAME.rule=Host(\`$SERVICE_NAME.mxsyx.site\`)"
-      --label="traefik.http.routers.$SERVICE_NAME.tls.certResolver=cloudflare"
-      --label="traefik.http.routers.$SERVICE_NAME-http.rule=Host(\`$SERVICE_NAME.mxsyx.site\`)"
-      --label="traefik.http.routers.$SERVICE_NAME-http.middlewares=redirect-https@file"
-      --label="traefik.http.services.$SERVICE_NAME.loadbalancer.server.port=8080"
+      --label="traefik.http.services.$SERVICE_NAME.loadbalancer.server.port=8090"
       $CONTAINER_IMAGE
     - else
     - docker service scale $SERVICE_NAME=2
