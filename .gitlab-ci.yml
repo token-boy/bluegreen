@@ -13,18 +13,21 @@ deploy:
   tags:
     - ci
   script:
-    # - docker pull $CONTAINER_IMAGE
     - if [[ -z $(docker service ls --format="{{.Name}}" | grep -w $SERVICE_NAME) ]]; then
     - docker service create
       --name=$SERVICE_NAME
       --replicas=1
       --update-delay=10s
-      --publish published=80,target=80
+      --publish published=8080,target=80
       --label="traefik.enable=true"
       --label="traefik.http.routers.$SERVICE_NAME.rule=Host(\`$SERVICE_NAME.mxsyx.site\`)"
       --label="traefik.http.routers.$SERVICE_NAME.tls.certResolver=cloudflare"
       --label="traefik.http.routers.$SERVICE_NAME-http.rule=Host(\`$SERVICE_NAME.mxsyx.site\`)"
       --label="traefik.http.routers.$SERVICE_NAME-http.middlewares=redirect-https@file"
+      --label="traefik.http.services.$SERVICE_NAME.loadbalancer.server.port=8080"
       $CONTAINER_IMAGE
+    - else
+    - docker service scale $SERVICE_NAME=2
+    - docker service update --image $CONTAINER_IMAGE SERVICE_NAME
+    - docker service scale $SERVICE_NAME=1
     - fi
-    # - docker service update --image $CONTAINER_IMAGE SERVICE_NAME
