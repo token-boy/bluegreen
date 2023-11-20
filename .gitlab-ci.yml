@@ -1,33 +1,31 @@
 variables:
   CONTAINER_IMAGE: $REG/$CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA
-  CONTAINER_NAME: $CI_PROJECT_NAME
-  MIDDLE_CONTAINER_NAME: $CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
+  SERVICE_NAME: $CI_PROJECT_NAME
 
 build:
   tags:
-    - ci-test
+    - ci
   script:
     - docker build --tag $CONTAINER_IMAGE .
-    - docker push $CONTAINER_IMAGE
+    # - docker push $CONTAINER_IMAGE
 
 deploy:
   stage: deploy
   tags:
-    - ci-test
-  variables:
-    DOCKER_HOST: $JOYRESERVE_DEMO
+    - ci
+  # variables:
+    # DOCKER_HOST: $JOYRESERVE_DEMO
   script:
-    - docker pull $CONTAINER_IMAGE
-    - docker run --detach
-      --name=$MIDDLE_CONTAINER_NAME
-      --net=test
+    # - docker pull $CONTAINER_IMAGE
+    - if [[ -z $(docker service ls --format="{{.Name}}" | grep -w $SERVICE_NAME) ]]; then
+    - docker service create
+      --name=$SERVICE_NAME
+      --replicas=1
+      --update-delay=10s
       --label="traefik.enable=true"
-      --label="traefik.http.routers.$MIDDLE_CONTAINER_NAME.rule=Host(\`$CONTAINER_NAME.reserve.sya.org.cn\`)"
-      --label="traefik.http.routers.$MIDDLE_CONTAINER_NAME.tls.certResolver=myresolver"
-      --label="traefik.http.routers.$MIDDLE_CONTAINER_NAME-http.rule=Host(\`$CONTAINER_NAME.reserve.sya.org.cn\`)"
-      --label="traefik.http.routers.$MIDDLE_CONTAINER_NAME-http.middlewares=redirect-https@file"
-      --volume="/etc/localtime:/etc/localtime:ro"
-      $CONTAINER_IMAGE
-    # - docker stop $CONTAINER_NAME || true
-    # - docker rm --force $CONTAINER_NAME || true
-    # - docker rename $MIDDLE_CONTAINER_NAME $CONTAINER_NAME
+      --label="traefik.http.routers.$SERVICE_NAME.rule=Host(\`$SERVICE_NAME.mxsyx.site\`)"
+      --label="traefik.http.routers.$SERVICE_NAME.tls.certResolver=cloudflare"
+      --label="traefik.http.routers.$SERVICE_NAME-http.rule=Host(\`$SERVICE_NAME.mxsyx.site\`)"
+      --label="traefik.http.routers.$SERVICE_NAME-http.middlewares=redirect-https@file"
+    - fi
+    # - docker service update --image $CONTAINER_IMAGE SERVICE_NAME
