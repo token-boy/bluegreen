@@ -17,7 +17,6 @@ deploy:
     - docker service create
       --name=$SERVICE_NAME
       --replicas=1
-      --update-delay=10s
       --label="traefik.enable=true"
       --label="traefik.http.routers.$SERVICE_NAME.rule=Host(\`$SERVICE_NAME.mxsyx.site\`)"
       --label="traefik.http.routers.$SERVICE_NAME.tls.certResolver=letsencrypt"
