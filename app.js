@@ -2,7 +2,7 @@ const express = require('express')
 
 const app = express()
 const port = 80
-const version = 5
+const version = 6
 
 app.get('/', (req, res) => {
   res.send(version.toString())
