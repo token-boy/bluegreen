@@ -1,0 +1,8 @@
+http:
+  routers:
+    api:
+      rule: Host(`traefik.mxsyx.site`)
+      tls:
+        certResolver: letsencrypt
+      middlewares: auth
+      service: api@internal

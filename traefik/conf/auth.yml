@@ -1,0 +1,6 @@
+http:
+  middlewares:
+    auth:
+      basicauth:
+        users:
+          - mxsyx:$2y$05$z9Vq00ULxEWqbVi.1LDWiueIxMaNAz4KfKSNlsLaad3TYkUL6YOie

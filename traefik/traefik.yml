@@ -1,0 +1,43 @@
+## traefik.yml
+
+# Docker configuration backend
+providers:
+  swarm:
+    endpoint: unix:///var/run/docker.sock
+  file:
+    directory: /etc/traefik/conf
+    watch: true
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+    forwardedHeaders:
+      insecure: true
+  websecure:
+    address: ":443"
+    forwardedHeaders:
+      insecure: true
+
+# API and dashboard configuration
+api:
+  insecure: true
+  dashboard: true
+
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: mxsyxin@gmail.com
+      storage: /var/lib/traefik/acme.json
+      #caserver: https://acme-staging-v02.api.letsencrypt.org/directory
+
+log:
+  level: debug
+
+accessLog:
+  filePath: "/var/log/traefik/access.log"
