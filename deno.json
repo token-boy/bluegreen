@@ -1,8 +1,5 @@
 {
   "tasks": {
-    "start": "deno run --allow-net --allow-env --allow-read --allow-sys --allow-ffi --env-file=.env --watch app.ts"
-  },
-  "imports": {
-    "@db/redis": "jsr:@db/redis@^0.37.1"
+    "start": "deno run --allow-net --allow-env --allow-read --allow-sys --allow-ffi app.ts"
   }
 }

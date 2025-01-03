@@ -7,6 +7,7 @@ on:
 
 env:
   IMAGE: ghcr.io/${{ github.repository }}:${{ github.sha }}
+  PROJECT_NAME: bluegreen
 
 jobs:
   build-and-deploy:
@@ -48,4 +49,13 @@ jobs:
           script: |
             docker login -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
             docker pull ${{ env.IMAGE }}
-            /root/deploy.sh ${{ github.repository }} ${{ github.sha }}
+            docker run --detach \
+              --name=${{ env.PROJECT_NAME }}-${{ github.sha }} \
+              --label=${{ env.PROJECT_NAME }} \
+              --label=traefik.enable=true \
+              --label=traefik.http.routers.${{ env.PROJECT_NAME }}.rule=Host\(\`bl.mxsyx.site\`\) \
+              --label=traefik.http.routers.${{ env.PROJECT_NAME }}.tls.certResolver=letsencrypt \
+              --label=traefik.http.routers.${{ env.PROJECT_NAME }}.service=${{ env.PROJECT_NAME }}@file \
+              --network=main \
+              ${{ env.IMAGE }}
+            curl -if "http://localhost:10208/join?service=${{ env.PROJECT_NAME }}&port=8000"
