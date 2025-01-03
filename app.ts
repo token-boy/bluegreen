@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
   console.log(url.searchParams.get("v"));
-  2;
+  3;
   return new Response(version, {
     status: 200,
   });
