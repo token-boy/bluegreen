@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  IMAGE: ghcr.io/${{ github.repository }}:${{ github.sha }}
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -29,7 +32,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
+          tags: ${{ env.IMAGE }}
 
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.2.0
@@ -39,4 +42,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             docker login -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
-            docker pull ghcr.io/${{ github.repository }}:${{ github.sha }}
+            docker pull ${{ env.IMAGE }}
