@@ -4,5 +4,6 @@ http:
       rule: Host(`traefik.mxsyx.site`)
       tls:
         certResolver: letsencrypt
-      middlewares: auth
+      middlewares: 
+        - auth
       service: api@internal

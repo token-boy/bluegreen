@@ -35,6 +35,8 @@ certificatesResolvers:
       email: mxsyxin@gmail.com
       storage: /var/lib/traefik/acme.json
       #caserver: https://acme-staging-v02.api.letsencrypt.org/directory
+      httpChallenge:
+        entryPoint: web
 
 log:
   level: debug
