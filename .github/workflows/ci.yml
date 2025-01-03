@@ -48,4 +48,4 @@ jobs:
           script: |
             docker login -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
             docker pull ${{ env.IMAGE }}
-            /root/deploy.sh ${{ github.event.repository.name }} ${{ github.sha }}
+            /root/deploy.sh ${{ github.repository }} ${{ github.sha }}
