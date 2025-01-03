@@ -3,7 +3,6 @@
     "start": "deno run --allow-net --allow-env --allow-read --allow-sys --allow-ffi --env-file=.env --watch app.ts"
   },
   "imports": {
-    "@db/redis": "jsr:@db/redis@^0.37.1",
-    "@oak/oak": "jsr:@oak/oak@^14.2.0"
+    "@db/redis": "jsr:@db/redis@^0.37.1"
   }
 }
