@@ -1,5 +1,5 @@
 [Unit]
-Description=Wsync daemon.
+Description=Bluegreen daemon.
 After=network.target
 
 [Service]
