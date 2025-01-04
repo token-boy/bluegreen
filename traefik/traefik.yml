@@ -2,7 +2,7 @@
 
 # Docker configuration backend
 providers:
-  swarm:
+  docker:
     endpoint: unix:///var/run/docker.sock
   file:
     directory: /etc/traefik/conf
