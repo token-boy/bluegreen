@@ -54,4 +54,4 @@ jobs:
               --label=${{ env.PROJECT_NAME }} \
               --network=main \
               ${{ env.IMAGE }}
-            curl -if "http://localhost:10234/join?service=${{ env.PROJECT_NAME }}&port=8000&host=bl.mxsyx.site&updateDelay=2"
+            curl -if "http://localhost:10234/join?service=${{ env.PROJECT_NAME }}&port=8000&host=bl.mxsyx.site&updateDelay=2&stopTimeout=10"

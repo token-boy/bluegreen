@@ -75,13 +75,17 @@ func main() {
 		host := query.Get("host")
 		port := query.Get("port")
 		updateDelay := query.Get("updateDelay")
+		stopTimeout := query.Get("stopTimeout")
 		if serviceName == "" || host == "" || port == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Missing required parameters (service, host, port)"))
 			return
 		}
 		if updateDelay == "" {
-			updateDelay = "5"
+			updateDelay = "300"
+		}
+		if stopTimeout == "" {
+			stopTimeout = "10"
 		}
 
 		log.Printf("Joining service: %s, host: %s, port: %s", serviceName, host, port)
@@ -169,8 +173,13 @@ func main() {
 							log.Fatalf("Error parsing updateDelay: %s", err)
 							return
 						}
-						time.Sleep(time.Duration(delay) * time.Minute)
-						if err := cli.ContainerStop(ctx, containerID, container.StopOptions{}); err != nil {
+						time.Sleep(time.Duration(delay) * time.Second)
+						timeout, err := strconv.Atoi(stopTimeout)
+						if err != nil {
+							log.Fatalf("Error parsing stopTimeout: %s", err)
+							timeout = 10
+						}
+						if err := cli.ContainerStop(ctx, containerID, container.StopOptions{Timeout: &timeout}); err != nil {
 							log.Fatalf("Error stop container %s: %s", containerName, err)
 							return
 						}
@@ -180,7 +189,7 @@ func main() {
 						delete(stoppingContainers, containerID)
 						log.Printf("Stopped container: %s", containerName)
 					}()
-					log.Printf("Container %s will be stopped after %s minutes", containerName, updateDelay)
+					log.Printf("Container %s will be stopped after %s seconds", containerName, updateDelay)
 					stoppingContainers[containerID] = true
 				}
 				servers = append(servers, Server{

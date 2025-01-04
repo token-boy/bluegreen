@@ -3,11 +3,9 @@ const version = Deno.env.get("HOSTNAME");
 const sockets: WebSocket[] = [];
 
 Deno.addSignalListener("SIGTERM", () => {
-  console.log('SIGTERM');
   for (const socket of sockets) {
     socket.send("reconnect");
   }
-  console.log('SIGTERM1');
 });
 
 Deno.serve(async (req) => {
@@ -33,4 +31,3 @@ Deno.serve(async (req) => {
     status: 200,
   });
 });
-
