@@ -155,10 +155,13 @@ func main() {
 
 			servers := []Server{}
 			for i := range len(containers) {
+				containerID := containers[i].ID
+				containerName := containers[i].Names[0]
+
 				weight := 0
 				if i == 0 {
 					weight = 100
-				} else if _, exists := stoppingContainers[containers[i].ID]; !exists {
+				} else if _, exists := stoppingContainers[containerID]; !exists {
 					// Close old containers
 					go func() {
 						delay, err := strconv.Atoi(updateDelay)
@@ -167,15 +170,18 @@ func main() {
 							return
 						}
 						time.Sleep(time.Duration(delay) * time.Minute)
-						if err := cli.ContainerStop(ctx, containers[i].ID, container.StopOptions{}); err != nil {
-							log.Fatalf("Error stop container: %s", err)
+						if err := cli.ContainerStop(ctx, containerID, container.StopOptions{}); err != nil {
+							log.Fatalf("Error stop container %s: %s", containerName, err)
 							return
 						}
-						delete(stoppingContainers, containers[i].ID)
-						log.Printf("Stopped container: %s", containers[i].Names[0])
+						if err := cli.ContainerRemove(ctx, containerID, container.RemoveOptions{}); err != nil {
+							log.Fatalf("Error remove container %s: %s", containerName, err)
+						}
+						delete(stoppingContainers, containerID)
+						log.Printf("Stopped container: %s", containerName)
 					}()
-					log.Printf("Container %s will be stopped after %s minutes", containers[i].Names[0], updateDelay)
-					stoppingContainers[containers[i].ID] = true
+					log.Printf("Container %s will be stopped after %s minutes", containerName, updateDelay)
+					stoppingContainers[containerID] = true
 				}
 				servers = append(servers, Server{
 					URL:    fmt.Sprintf("http://%s:%s", containers[i].NetworkSettings.Networks["main"].IPAddress, port),
