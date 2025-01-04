@@ -3,9 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"sort"
+	"strconv"
+	"time"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -64,16 +67,24 @@ func main() {
 	}
 	defer cli.Close()
 
+	stoppingContainers := make(map[string]bool)
+
 	http.HandleFunc("/join", func(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query()
 		serviceName := query.Get("service")
 		host := query.Get("host")
 		port := query.Get("port")
+		updateDelay := query.Get("updateDelay")
 		if serviceName == "" || host == "" || port == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Missing required parameters (service, host, port)"))
 			return
 		}
+		if updateDelay == "" {
+			updateDelay = "5"
+		}
+
+		log.Printf("Joining service: %s, host: %s, port: %s", serviceName, host, port)
 
 		containers, err := cli.ContainerList(ctx, container.ListOptions{
 			Filters: filters.NewArgs(filters.Arg("label", serviceName)),
@@ -126,7 +137,7 @@ func main() {
 			os.WriteFile(configFilePath, configData, 0644)
 
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("First container deployed"))
+			w.Write([]byte("Container joined the load balancer"))
 		} else {
 			configFile, err := os.ReadFile(configFilePath)
 			if err != nil {
@@ -147,6 +158,24 @@ func main() {
 				weight := 0
 				if i == 0 {
 					weight = 100
+				} else if _, exists := stoppingContainers[containers[i].ID]; !exists {
+					// Close old containers
+					go func() {
+						delay, err := strconv.Atoi(updateDelay)
+						if err != nil {
+							log.Fatalf("Error parsing updateDelay: %s", err)
+							return
+						}
+						time.Sleep(time.Duration(delay) * time.Minute)
+						if err := cli.ContainerStop(ctx, containers[i].ID, container.StopOptions{}); err != nil {
+							log.Fatalf("Error stop container: %s", err)
+							return
+						}
+						delete(stoppingContainers, containers[i].ID)
+						log.Printf("Stopped container: %s", containers[i].Names[0])
+					}()
+					log.Printf("Container %s will be stopped after %s minutes", containers[i].Names[0], updateDelay)
+					stoppingContainers[containers[i].ID] = true
 				}
 				servers = append(servers, Server{
 					URL:    fmt.Sprintf("http://%s:%s", containers[i].NetworkSettings.Networks["main"].IPAddress, port),
@@ -170,8 +199,8 @@ func main() {
 		}
 	})
 
-	fmt.Println("Server is running on http://localhost:10208")
-	if err := http.ListenAndServe(":10208", nil); err != nil {
-		fmt.Printf("Error starting server: %s\n", err)
+	log.Println("App is running on http://localhost:10234")
+	if err := http.ListenAndServe(":10234", nil); err != nil {
+		log.Printf("Error starting server: %s\n", err)
 	}
 }
