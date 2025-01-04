@@ -1,5 +1,13 @@
 const version = Deno.env.get("HOSTNAME");
 
+const sockets: WebSocket[] = [];
+
+Deno.addSignalListener("SIGTERM", () => {
+  for (const socket of sockets) {
+    socket.send("reconnect");
+  }
+});
+
 Deno.serve(async (req) => {
   const url = new URL(req.url);
 
@@ -11,6 +19,7 @@ Deno.serve(async (req) => {
     socket.addEventListener("message", () => {
       socket.send(version as string);
     });
+    sockets.push(socket);
     return response;
   }
 
