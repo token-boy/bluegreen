@@ -1,0 +1,11 @@
+[Unit]
+Description=Wsync daemon.
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/local/bin/bluegreen
+
+[Install]
+WantedBy=multi-user.target

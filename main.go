@@ -26,7 +26,18 @@ type Service struct {
 	LoadBalancer LoadBalancer `yaml:"loadBalancer"`
 }
 
+type TLS struct {
+	CertResolver string `yaml:"certResolver"`
+}
+
+type Router struct {
+	Rule    string `yaml:"rule"`
+	TLS     TLS    `yaml:"tls"`
+	Service string `yaml:"service"`
+}
+
 type Http struct {
+	Routers  map[string]Router  `yaml:"routers"`
 	Services map[string]Service `yaml:"services"`
 }
 
@@ -56,10 +67,11 @@ func main() {
 	http.HandleFunc("/join", func(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query()
 		serviceName := query.Get("service")
+		host := query.Get("host")
 		port := query.Get("port")
-		if serviceName == "" || port == "" {
+		if serviceName == "" || host == "" || port == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Missing service or port"))
+			w.Write([]byte("Missing required parameters (service, host, port)"))
 			return
 		}
 
@@ -86,6 +98,16 @@ func main() {
 		configFilePath := "/etc/traefik/conf/" + serviceName + ".yml"
 		if !fileExists(configFilePath) {
 			config := Config{}
+
+			config.Http.Routers = make(map[string]Router)
+			config.Http.Routers[serviceName] = Router{
+				Rule: fmt.Sprintf("Host(`%s`)", host),
+				TLS: TLS{
+					CertResolver: "letsencrypt",
+				},
+				Service: serviceName + "@file",
+			}
+
 			config.Http.Services = make(map[string]Service)
 			config.Http.Services[serviceName] = Service{
 				LoadBalancer{
